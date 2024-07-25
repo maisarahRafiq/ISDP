@@ -43,10 +43,7 @@ def move_drone(movement, speed='normal'):
     """Control drone movement"""
     log(f"Executing {movement} at {speed} speed...")
     
-    if speed == 'normal':
-        duration = 1
-    elif speed == 'high':
-        duration = 0.5
+    duration = 5 if speed == 'normal' else 2.5
 
     if movement == "move_down":
         set_servo_angle(servo1, 0)
@@ -166,16 +163,13 @@ def simulate_drone():
                 else:
                     log("No violet sound detected, continuing normal operation")
                     move_drone("hover", 'normal')
-                    time.sleep(3)
             else:
                 log("No speaker detected, continuing normal operation")
                 move_drone("hover", 'normal')
-                time.sleep(3)
         
         if not drone_landed:
             log("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
             move_drone("hover", 'normal')
-            time.sleep(3)
         
         if not drone_landed:
             drone_landed = get_user_input("Should the drone land now?")
