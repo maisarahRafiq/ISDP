@@ -1,29 +1,38 @@
 import time
 import random
+import RPi.GPIO as GPIO
 
-class SimulatedServo:
-    def __init__(self, name):
+GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
+
+class Servo:
+    def __init__(self, name, pin):
         self.name = name
+        self.pin = pin
         self.angle = 0
+        GPIO.setup(self.pin, GPIO.OUT)
+        self.pwm = GPIO.PWM(self.pin, 50)  # 50Hz frequency
+        self.pwm.start(0)
 
     def set_angle(self, angle):
         self.angle = angle
+        duty = angle / 18 + 2
+        self.pwm.ChangeDutyCycle(duty)
         print(f"Servo {self.name} moved to {self.angle} degrees")
 
-class SimulatedDrone:
+class Drone:
     def __init__(self):
         self.battery = 100
         self.position = 0  # 0: ground, 1: air
         self.count = 0
         self.servos = {
-            'move': SimulatedServo('move'),
-            'camera': SimulatedServo('camera'),
-            'audio': SimulatedServo('audio'),
-            'hover': SimulatedServo('hover')
+            'move': Servo('move', 13),    # GPIO 27
+            'camera': Servo('camera', 15),  # GPIO 22
+            'audio': Servo('audio', 16),   # GPIO 23
+            'hover': Servo('hover', 18)    # GPIO 24
         }
 
     def simulate_action(self, action, duration=1):
-        print(f"Simulating action: {action}")
+        print(f"Performing action: {action}")
         if action == "Move Upwards":
             self.servos['move'].set_angle(180)
         elif action == "Move Backwards":
@@ -66,7 +75,7 @@ def drone_logic():
     print("START")
     print("Power On")
     
-    drone = SimulatedDrone()
+    drone = Drone()
     drone_landed = False
 
     while not drone_landed:
@@ -121,8 +130,12 @@ def drone_logic():
     print("END")
 
 # Run multiple simulations
-for i in range(3):
-    print(f"\n\nSimulation {i+1}")
-    print("="*20)
-    drone_logic()
-    time.sleep(2)
+try:
+    for i in range(3):
+        print(f"\n\nSimulation {i+1}")
+        print("="*20)
+        drone_logic()
+        time.sleep(2)
+finally:
+    # Clean up GPIO at the end
+    GPIO.cleanup()
