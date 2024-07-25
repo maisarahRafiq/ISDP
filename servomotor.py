@@ -5,14 +5,18 @@ import time
 GPIO.setmode(GPIO.BOARD)
 
 # Set all pins as output and set servos as PWM
-GPIO.setup(11, GPIO.OUT)
-servo1 = GPIO.PWM(11, 50)
-GPIO.setup(12, GPIO.OUT)
-servo2 = GPIO.PWM(12, 50)
-GPIO.setup(13, GPIO.OUT)
-servo3 = GPIO.PWM(13, 50)
-GPIO.setup(15, GPIO.OUT)
-servo4 = GPIO.PWM(15, 50)
+servo1_pin = 13     # GPIO 27
+servo2_pin = 15     # GPIO 22
+servo3_pin = 16     # GPIO 23
+servo4_pin = 18     # GPIO 24
+GPIO.setup(servo1_pin, GPIO.OUT)
+servo1 = GPIO.PWM(servo1_pin, 50)  # GPIO 27
+GPIO.setup(servo2_pin, GPIO.OUT)
+servo2 = GPIO.PWM(servo2_pin, 50)  # GPIO 22
+GPIO.setup(servo3_pin, GPIO.OUT)
+servo3 = GPIO.PWM(servo3_pin, 50)  # GPIO 23
+GPIO.setup(servo4_pin, GPIO.OUT)
+servo4 = GPIO.PWM(servo4_pin, 50)  # GPIO 24
 
 # Start PWM running, but with value of 0 (pulse off)
 servo1.start(0)
