@@ -45,59 +45,68 @@ def move_drone(movement, speed='normal'):
     log(f"Executing {movement} at {speed} speed...")
     
     duration = 5 if speed == 'normal' else 2.5
+    steps = 36  # For smoother 360-degree rotation
+
+    def rotate_servo(servo, start_angle, end_angle):
+        for angle in range(start_angle, end_angle, 10):
+            set_servo_angle(servo, angle % 360)
+            time.sleep(duration / steps)
 
     if movement == "move_down":
-        set_servo_angle(servo1, 0)
-        set_servo_angle(servo2, 0)
-        set_servo_angle(servo3, 90)
-        set_servo_angle(servo4, 90)
+        for _ in range(3):
+            rotate_servo(servo1, 0, 360)
+            rotate_servo(servo2, 0, 360)
+            rotate_servo(servo3, 0, 360)
+            rotate_servo(servo4, 0, 360)
     elif movement == "move_up":
-        set_servo_angle(servo1, 90)
-        set_servo_angle(servo2, 90)
-        set_servo_angle(servo3, 0)
-        set_servo_angle(servo4, 0)
+        for _ in range(3):
+            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo4, 360, 0, -10)
     elif movement == "move_forward":
-        set_servo_angle(servo1, 90)
-        set_servo_angle(servo2, 45)
-        set_servo_angle(servo3, 90)
-        set_servo_angle(servo4, 45)
+        for _ in range(3):
+            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo2, 0, 360)
+            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo4, 0, 360)
     elif movement == "move_backward":
-        set_servo_angle(servo1, 45)
-        set_servo_angle(servo2, 90)
-        set_servo_angle(servo3, 45)
-        set_servo_angle(servo4, 90)
+        for _ in range(3):
+            rotate_servo(servo1, 0, 360)
+            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo3, 0, 360)
+            rotate_servo(servo4, 360, 0, -10)
     elif movement == "bend_left":
-        set_servo_angle(servo1, 45)
-        set_servo_angle(servo2, 45)
-        set_servo_angle(servo3, 90)
-        set_servo_angle(servo4, 90)
+        for _ in range(3):
+            rotate_servo(servo1, 0, 360)
+            rotate_servo(servo2, 0, 360)
+            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo4, 360, 0, -10)
     elif movement == "bend_right":
-        set_servo_angle(servo1, 90)
-        set_servo_angle(servo2, 90)
-        set_servo_angle(servo3, 45)
-        set_servo_angle(servo4, 45)
+        for _ in range(3):
+            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo3, 0, 360)
+            rotate_servo(servo4, 0, 360)
     elif movement == "rotate_left":
-        for i in range(0, 361, 45):
-            set_servo_angle(servo1, i)
-            set_servo_angle(servo2, (i + 90) % 360)
-            set_servo_angle(servo3, (i + 180) % 360)
-            set_servo_angle(servo4, (i + 270) % 360)
-            time.sleep(duration / 8)
+        for _ in range(3):
+            rotate_servo(servo1, 0, 360)
+            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo4, 0, 360)
     elif movement == "rotate_right":
-        for i in range(0, 361, 45):
-            set_servo_angle(servo1, (i + 360) % 360)
-            set_servo_angle(servo2, (i + 270) % 360)
-            set_servo_angle(servo3, (i + 180) % 360)
-            set_servo_angle(servo4, (i + 90) % 360)
-            time.sleep(duration / 8)
+        for _ in range(3):
+            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo2, 0, 360)
+            rotate_servo(servo3, 0, 360)
+            rotate_servo(servo4, 360, 0, -10)
     elif movement == "hover":
-        set_servo_angle(servo1, 45)
-        set_servo_angle(servo2, 45)
-        set_servo_angle(servo3, 45)
-        set_servo_angle(servo4, 45)
-    
-    time.sleep(duration)
-
+        for _ in range(3):
+            set_servo_angle(servo1, 0)
+            set_servo_angle(servo2, 0)
+            set_servo_angle(servo3, 0)
+            set_servo_angle(servo4, 0)
+            time.sleep(duration / 3)
 def get_user_input(prompt):
     """Get user input (y/n) for decision points"""
     while True:
