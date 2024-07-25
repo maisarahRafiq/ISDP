@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+from datetime import datetime
 
 # Set up GPIO
 GPIO.setmode(GPIO.BOARD)
@@ -28,6 +29,11 @@ servo2.start(0)
 servo3.start(0)
 servo4.start(0)
 
+def log(message):
+    """Log the message with a timestamp"""
+    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
+    print("---")
+
 def set_servo_angle(servo, angle):
     """Set servo to a specific angle"""
     duty = angle / 18 + 2
@@ -35,7 +41,7 @@ def set_servo_angle(servo, angle):
 
 def move_drone(movement, speed='normal'):
     """Control drone movement"""
-    print(f"Executing {movement} at {speed} speed...")
+    log(f"Executing {movement} at {speed} speed...")
     
     if speed == 'normal':
         duration = 1
@@ -99,9 +105,9 @@ def get_user_input(prompt):
         print("Please enter 'y' or 'n'.")
 
 def simulate_drone():
-    print("Drone simulation started")
+    log("Drone simulation started")
     
-    print("Power On")
+    log("Power On")
     move_drone("hover", 'normal')  # Initial hover to show power on
     
     battery_low = False
@@ -112,77 +118,77 @@ def simulate_drone():
         battery_low = get_user_input("Is battery low?")
         
         if battery_low:
-            print("Battery Low - Initiating landing sequence")
+            log("Battery Low - Initiating landing sequence")
             move_drone("move_down", 'normal')
             drone_landed = True
             break
         
-        print("Moving Upwards")
+        log("Moving Upwards")
         move_drone("move_up", 'normal')
         
-        print("Image Processing")
+        log("Image Processing")
         obstacle_detected = get_user_input("Is an obstacle detected?")
         
         if obstacle_detected:
-            print("Obstacle detected, moving backwards")
+            log("Obstacle detected, moving backwards")
             move_drone("move_backward", 'normal')
         else:
             is_speaker = get_user_input("Is it a speaker?")
             
             if is_speaker:
-                print("Speaker detected")
-                print("Frequency Processing")
+                log("Speaker detected")
+                log("Frequency Processing")
                 violet_sound_detected = get_user_input("Is violet sound detected?")
                 
                 if violet_sound_detected:
-                    print("Violet sound detected")
-                    print("Moving Forward")
+                    log("Violet sound detected")
+                    log("Moving Forward")
                     move_drone("move_forward", 'high')
-                    print("Frequency Response and ANC Speaker activated")
-                    print("Detecting distance")
+                    log("Frequency Response and ANC Speaker activated")
+                    log("Detecting distance")
                     move_drone("hover", 'normal')
                     
                     db_reduced = get_user_input("Is dB reduced?")
                     if db_reduced:
-                        print("dB reduced, hovering for 30s")
+                        log("dB reduced, hovering for 30s")
                         move_drone("hover", 'normal')
                         time.sleep(30)
                         count += 1
                         
                         if count >= 3:
-                            print("Count reached 3, initiating landing")
+                            log("Count reached 3, initiating landing")
                             move_drone("move_down", 'normal')
                             drone_landed = True
                     else:
-                        print("dB not reduced, continuing normal operation")
+                        log("dB not reduced, continuing normal operation")
                         move_drone("rotate_left", 'normal')
                         move_drone("rotate_right", 'normal')
                 else:
-                    print("No violet sound detected, continuing normal operation")
+                    log("No violet sound detected, continuing normal operation")
                     move_drone("hover", 'normal')
                     time.sleep(3)
             else:
-                print("No speaker detected, continuing normal operation")
+                log("No speaker detected, continuing normal operation")
                 move_drone("hover", 'normal')
                 time.sleep(3)
         
         if not drone_landed:
-            print("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
+            log("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
             move_drone("hover", 'normal')
             time.sleep(3)
         
         if not drone_landed:
             drone_landed = get_user_input("Should the drone land now?")
     
-    print("Landing sequence initiated")
+    log("Landing sequence initiated")
     move_drone("move_down", 'normal')
-    print("Drone landed successfully")
+    log("Drone landed successfully")
 
 # Run the simulation
 try:
     simulate_drone()
 except KeyboardInterrupt:
-    print("Simulation interrupted by user")
+    log("Simulation interrupted by user")
 finally:
     # Clean up
     servo1.stop()
@@ -190,4 +196,4 @@ finally:
     servo3.stop()
     servo4.stop()
     GPIO.cleanup()
-    print("GPIO cleaned up")
+    log("GPIO cleaned up")
