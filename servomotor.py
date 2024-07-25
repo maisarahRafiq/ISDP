@@ -5,57 +5,48 @@ import time
 GPIO.setmode(GPIO.BOARD)
 
 # Define servo pins
-servo1_pin = 13     # GPIO 27
-servo2_pin = 15     # GPIO 22
-servo3_pin = 16     # GPIO 23
-servo4_pin = 18     # GPIO 24
+servo_pins = {
+    1: 13,  # GPIO 27
+    2: 15,  # GPIO 22
+    3: 16,  # GPIO 23
+    4: 18   # GPIO 24
+}
 
-# Set up GPIO pins
-GPIO.setup(servo1_pin, GPIO.OUT)
-GPIO.setup(servo2_pin, GPIO.OUT)
-GPIO.setup(servo3_pin, GPIO.OUT)
-GPIO.setup(servo4_pin, GPIO.OUT)
+def setup_servo(pin):
+    GPIO.setup(pin, GPIO.OUT)
+    return GPIO.PWM(pin, 50)
 
-# Create PWM objects for each servo
-servo1 = GPIO.PWM(servo1_pin, 50)  # GPIO 27
-servo2 = GPIO.PWM(servo2_pin, 50)  # GPIO 22
-servo3 = GPIO.PWM(servo3_pin, 50)  # GPIO 23
-servo4 = GPIO.PWM(servo4_pin, 50)  # GPIO 24
-
-# Start PWM
-servo1.start(0)
-servo2.start(0)
-servo3.start(0)
-servo4.start(0)
-
-def set_angle(servo, angle):
-    duty = angle / 18 + 2
-    servo.ChangeDutyCycle(duty)
-    time.sleep(0.3)
+def test_servo(servo, servo_num):
+    print(f"Testing Servo {servo_num} on pin {servo_pins[servo_num]}")
+    servo.start(0)
+    
+    for angle in [0, 90, 180, 90, 0]:
+        duty = angle / 18 + 2
+        print(f"Moving Servo {servo_num} to {angle} degrees (duty cycle: {duty:.2f})")
+        servo.ChangeDutyCycle(duty)
+        time.sleep(1)
+    
+    servo.stop()
+    print(f"Finished testing Servo {servo_num}")
 
 try:
-    while True:
-        # Example: Move all servos from 0 to 180 degrees
-        for angle in range(0, 181, 10):
-            set_angle(servo1, angle)
-            set_angle(servo2, angle)
-            set_angle(servo3, angle)
-            set_angle(servo4, angle)
+    for servo_num in servo_pins:
+        input(f"Press Enter to test Servo {servo_num} on pin {servo_pins[servo_num]}...")
         
-        # Move back from 180 to 0 degrees
-        for angle in range(180, -1, -10):
-            set_angle(servo1, angle)
-            set_angle(servo2, angle)
-            set_angle(servo3, angle)
-            set_angle(servo4, angle)
+        servo = setup_servo(servo_pins[servo_num])
+        test_servo(servo, servo_num)
+        
+        GPIO.cleanup(servo_pins[servo_num])
+        
+        response = input("Did the correct servo move? (yes/no): ").lower()
+        if response != 'yes':
+            print(f"Please check the wiring for Servo {servo_num} on pin {servo_pins[servo_num]}")
+        
+        print("\n")
 
 except KeyboardInterrupt:
     print("Program stopped by user")
 
 finally:
-    # Clean up
-    servo1.stop()
-    servo2.stop()
-    servo3.stop()
-    servo4.stop()
     GPIO.cleanup()
+    print("GPIO cleanup completed")
