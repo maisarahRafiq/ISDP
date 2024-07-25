@@ -28,56 +28,93 @@ servo2.start(0)
 servo3.start(0)
 servo4.start(0)
 
-def set_servo_speed(servo, speed):
-    """Set servo speed (duty cycle)"""
-    if speed == "normal":
-        duty = 7.5  # Adjust as needed
-    elif speed == "high":
-        duty = 10  # Adjust as needed
+def set_servo_angle(servo, angle):
+    """Set servo to a specific angle"""
+    duty = angle / 18 + 2
     servo.ChangeDutyCycle(duty)
 
-def move_drone(movement, speed="normal"):
-    """Control drone movement based on the control diagram"""
+def move_drone(movement, duration=3):
+    """Control drone movement with more pronounced and longer-lasting movements"""
+    print(f"Executing {movement}...")
     if movement == "move_down":
-        set_servo_speed(servo1, speed)
-        set_servo_speed(servo2, speed)
-        set_servo_speed(servo3, "normal")
-        set_servo_speed(servo4, "normal")
+        for _ in range(3):  # Repeat movement for emphasis
+            set_servo_angle(servo1, 0)
+            set_servo_angle(servo2, 0)
+            set_servo_angle(servo3, 90)
+            set_servo_angle(servo4, 90)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
     elif movement == "move_up":
-        set_servo_speed(servo1, "normal")
-        set_servo_speed(servo2, "normal")
-        set_servo_speed(servo3, speed)
-        set_servo_speed(servo4, speed)
+        for _ in range(3):
+            set_servo_angle(servo1, 90)
+            set_servo_angle(servo2, 90)
+            set_servo_angle(servo3, 0)
+            set_servo_angle(servo4, 0)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
     elif movement == "move_forward":
-        set_servo_speed(servo1, speed)
-        set_servo_speed(servo2, "normal")
-        set_servo_speed(servo3, speed)
-        set_servo_speed(servo4, "normal")
+        for _ in range(3):
+            set_servo_angle(servo1, 90)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 90)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
     elif movement == "move_backward":
-        set_servo_speed(servo1, "normal")
-        set_servo_speed(servo2, speed)
-        set_servo_speed(servo3, "normal")
-        set_servo_speed(servo4, speed)
-    elif movement == "bend_left":
-        set_servo_speed(servo1, "normal")
-        set_servo_speed(servo2, speed)
-        set_servo_speed(servo3, "normal")
-        set_servo_speed(servo4, speed)
-    elif movement == "bend_right":
-        set_servo_speed(servo1, speed)
-        set_servo_speed(servo2, "normal")
-        set_servo_speed(servo3, speed)
-        set_servo_speed(servo4, "normal")
+        for _ in range(3):
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 90)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 90)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
     elif movement == "rotate_left":
-        set_servo_speed(servo1, "normal")
-        set_servo_speed(servo2, speed)
-        set_servo_speed(servo3, speed)
-        set_servo_speed(servo4, "normal")
+        for _ in range(3):
+            set_servo_angle(servo1, 0)
+            set_servo_angle(servo2, 90)
+            set_servo_angle(servo3, 90)
+            set_servo_angle(servo4, 0)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
     elif movement == "rotate_right":
-        set_servo_speed(servo1, speed)
-        set_servo_speed(servo2, "normal")
-        set_servo_speed(servo3, "normal")
-        set_servo_speed(servo4, speed)
+        for _ in range(3):
+            set_servo_angle(servo1, 90)
+            set_servo_angle(servo2, 0)
+            set_servo_angle(servo3, 0)
+            set_servo_angle(servo4, 90)
+            time.sleep(duration/3)
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration/3)
+    elif movement == "hover":
+        for _ in range(3):
+            set_servo_angle(servo1, 45)
+            set_servo_angle(servo2, 45)
+            set_servo_angle(servo3, 45)
+            set_servo_angle(servo4, 45)
+            time.sleep(duration)
 
 def get_user_input(prompt):
     """Get user input (y/n) for decision points"""
@@ -90,71 +127,74 @@ def get_user_input(prompt):
 def simulate_drone():
     print("Drone simulation started")
     
-    # Power On
     print("Power On")
+    move_drone("hover", 5)  # Initial hover to show power on
     
     battery_low = False
     drone_landed = False
     count = 0
     
     while not drone_landed:
-        # Check battery
         battery_low = get_user_input("Is battery low?")
         
         if battery_low:
-            print("Battery Low")
+            print("Battery Low - Initiating landing sequence")
+            move_drone("move_down", 5)
             drone_landed = True
             break
         
-        # Move Upwards
         print("Moving Upwards")
-        move_drone("move_up", "high")
-        time.sleep(2)
+        move_drone("move_up", 5)
         
-        # Image and Audio Processing
         obstacle_detected = get_user_input("Is an obstacle detected?")
         
         if obstacle_detected:
             print("Obstacle detected, moving backwards")
-            move_drone("move_backward", "high")
-            time.sleep(2)
+            move_drone("move_backward", 5)
         else:
-            violet_sound_detected = get_user_input("Is violet sound detected?")
+            is_speaker = get_user_input("Is it a speaker?")
             
-            if violet_sound_detected:
-                print("Violet sound detected")
-                move_drone("move_forward")
-                time.sleep(1)
-                print("Frequency Response")
-                time.sleep(1)
-                print("ANC Speaker activated")
-                time.sleep(1)
+            if is_speaker:
+                print("Speaker detected")
+                violet_sound_detected = get_user_input("Is violet sound detected?")
                 
-                db_reduced = get_user_input("Is dB reduced?")
-                if db_reduced:
-                    print("dB reduced, hovering for 30s")
-                    move_drone("move_up")  # Hover
-                    time.sleep(30)
-                    count += 1
+                if violet_sound_detected:
+                    print("Violet sound detected")
+                    move_drone("move_forward", 5)
+                    print("Frequency Response and ANC Speaker activated")
+                    move_drone("hover", 5)
                     
-                    if count >= 3:
-                        print("Count reached 3, landing")
-                        drone_landed = True
+                    db_reduced = get_user_input("Is dB reduced?")
+                    if db_reduced:
+                        print("dB reduced, hovering for demonstration")
+                        move_drone("hover", 10)
+                        count += 1
+                        
+                        if count >= 3:
+                            print("Count reached 3, initiating landing")
+                            move_drone("move_down", 5)
+                            drone_landed = True
+                    else:
+                        print("dB not reduced, continuing normal operation")
+                        move_drone("rotate_left", 5)
+                        move_drone("rotate_right", 5)
                 else:
-                    print("dB not reduced, continuing")
+                    print("No violet sound detected, continuing normal operation")
+                    move_drone("hover", 3)
+            else:
+                print("No speaker detected, continuing normal operation")
+                move_drone("hover", 3)
         
-        # Data Transmission
-        print("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
-        time.sleep(1)
+        if not drone_landed:
+            print("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
+            move_drone("hover", 3)
         
-        # Check if drone has landed
-        drone_landed = get_user_input("Has the drone landed?")
+        if not drone_landed:
+            drone_landed = get_user_input("Should the drone land now?")
     
-    # Landing
-    print("Landing")
-    move_drone("move_down", "normal")
-    time.sleep(3)
-    print("Drone landed")
+    print("Landing sequence initiated")
+    move_drone("move_down", 5)
+    print("Drone landed successfully")
 
 # Run the simulation
 try:
