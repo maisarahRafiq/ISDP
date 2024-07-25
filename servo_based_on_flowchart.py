@@ -1,15 +1,50 @@
 import time
 import random
 
+class SimulatedServo:
+    def __init__(self, name):
+        self.name = name
+        self.angle = 0
+
+    def set_angle(self, angle):
+        self.angle = angle
+        print(f"Servo {self.name} moved to {self.angle} degrees")
+
 class SimulatedDrone:
     def __init__(self):
         self.battery = 100
         self.position = 0  # 0: ground, 1: air
         self.count = 0
+        self.servos = {
+            'move': SimulatedServo('move'),
+            'camera': SimulatedServo('camera'),
+            'audio': SimulatedServo('audio'),
+            'hover': SimulatedServo('hover')
+        }
 
     def simulate_action(self, action, duration=1):
         print(f"Simulating action: {action}")
+        if action == "Move Upwards":
+            self.servos['move'].set_angle(180)
+        elif action == "Move Backwards":
+            self.servos['move'].set_angle(0)
+        elif action == "Move Forward":
+            self.servos['move'].set_angle(90)
+        elif action == "Image Processing":
+            self.servos['camera'].set_angle(90)
+        elif action == "Audio Processing":
+            self.servos['audio'].set_angle(90)
+        elif action == "Hover":
+            self.servos['hover'].set_angle(90)
+        elif action == "Land":
+            self.servos['move'].set_angle(0)
+            self.servos['hover'].set_angle(0)
         time.sleep(duration)
+        
+        # Reset servos after action (except for landing)
+        if action != "Land":
+            for servo in self.servos.values():
+                servo.set_angle(0)
 
     def check_battery(self):
         self.battery -= random.randint(1, 5)
