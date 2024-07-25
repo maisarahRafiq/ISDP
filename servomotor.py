@@ -5,52 +5,48 @@ import time
 GPIO.setmode(GPIO.BOARD)
 
 # Define servo pins
-servo1_pin = 13     # GPIO 27
-servo2_pin = 15     # GPIO 22
-servo3_pin = 16     # GPIO 23
-servo4_pin = 18     # GPIO 24
+servo_pins = {
+    1: 13,  # GPIO 27
+    2: 15,  # GPIO 22
+    3: 16,  # GPIO 23
+    4: 18   # GPIO 24
+}
 
-# Set up GPIO pins
-GPIO.setup(servo1_pin, GPIO.OUT)
-GPIO.setup(servo2_pin, GPIO.OUT)
-GPIO.setup(servo3_pin, GPIO.OUT)
-GPIO.setup(servo4_pin, GPIO.OUT)
+def setup_servo(pin):
+    GPIO.setup(pin, GPIO.OUT)
+    return GPIO.PWM(pin, 50)
 
-# Create PWM objects for each servo
-servo1 = GPIO.PWM(servo1_pin, 50)
-servo2 = GPIO.PWM(servo2_pin, 50)
-servo3 = GPIO.PWM(servo3_pin, 50)
-servo4 = GPIO.PWM(servo4_pin, 50)
-
-def test_servo(servo, servo_name):
-    print(f"Testing {servo_name}")
+def test_servo(servo, servo_num):
+    print(f"Testing Servo {servo_num} on pin {servo_pins[servo_num]}")
     servo.start(0)
     
     for angle in [0, 90, 180, 90, 0]:
         duty = angle / 18 + 2
-        print(f"Moving {servo_name} to {angle} degrees (duty cycle: {duty:.2f})")
+        print(f"Moving Servo {servo_num} to {angle} degrees (duty cycle: {duty:.2f})")
         servo.ChangeDutyCycle(duty)
         time.sleep(1)
     
     servo.stop()
-    print(f"Finished testing {servo_name}\n")
+    print(f"Finished testing Servo {servo_num}")
 
 try:
-    test_servo(servo1, "Servo 1")
-    time.sleep(2)
-    
-    test_servo(servo2, "Servo 2")
-    time.sleep(2)
-    
-    test_servo(servo3, "Servo 3")
-    time.sleep(2)
-    
-    test_servo(servo4, "Servo 4")
+    for servo_num in servo_pins:
+        input(f"Press Enter to test Servo {servo_num} on pin {servo_pins[servo_num]}...")
+        
+        servo = setup_servo(servo_pins[servo_num])
+        test_servo(servo, servo_num)
+        
+        GPIO.cleanup(servo_pins[servo_num])
+        
+        response = input("Did the correct servo move? (yes/no): ").lower()
+        if response != 'yes':
+            print(f"Please check the wiring for Servo {servo_num} on pin {servo_pins[servo_num]}")
+        
+        print("\n")
 
 except KeyboardInterrupt:
     print("Program stopped by user")
 
 finally:
-    # Clean up
     GPIO.cleanup()
     print("GPIO cleanup completed")
