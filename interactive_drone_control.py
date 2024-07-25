@@ -39,7 +39,8 @@ def set_servo_angle(servo, angle):
     """Set servo to a specific angle"""
     duty = angle / 18 + 2
     servo.ChangeDutyCycle(duty)
-    log(f"Set servo to angle {angle}")
+    # Commenting out the print statement for servo angle
+    # log(f"Set servo to angle {angle}")
 
 def rotate_servo(servo, start_angle, end_angle, duration, steps):
     step = 10 if start_angle < end_angle else -10
