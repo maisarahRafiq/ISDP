@@ -38,6 +38,7 @@ def set_servo_angle(servo, angle):
     """Set servo to a specific angle"""
     duty = angle / 18 + 2
     servo.ChangeDutyCycle(duty)
+    log(f"Set servo to angle {angle}")
 
 def move_drone(movement, speed='normal'):
     """Control drone movement"""
@@ -76,15 +77,19 @@ def move_drone(movement, speed='normal'):
         set_servo_angle(servo3, 45)
         set_servo_angle(servo4, 45)
     elif movement == "rotate_left":
-        set_servo_angle(servo1, 0)
-        set_servo_angle(servo2, 90)
-        set_servo_angle(servo3, 90)
-        set_servo_angle(servo4, 0)
+        for i in range(0, 361, 45):
+            set_servo_angle(servo1, i)
+            set_servo_angle(servo2, (i + 90) % 360)
+            set_servo_angle(servo3, (i + 180) % 360)
+            set_servo_angle(servo4, (i + 270) % 360)
+            time.sleep(duration / 8)
     elif movement == "rotate_right":
-        set_servo_angle(servo1, 90)
-        set_servo_angle(servo2, 0)
-        set_servo_angle(servo3, 0)
-        set_servo_angle(servo4, 90)
+        for i in range(0, 361, 45):
+            set_servo_angle(servo1, (i + 360) % 360)
+            set_servo_angle(servo2, (i + 270) % 360)
+            set_servo_angle(servo3, (i + 180) % 360)
+            set_servo_angle(servo4, (i + 90) % 360)
+            time.sleep(duration / 8)
     elif movement == "hover":
         set_servo_angle(servo1, 45)
         set_servo_angle(servo2, 45)
