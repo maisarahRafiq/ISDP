@@ -146,6 +146,7 @@ def simulate_drone():
         print("Moving Upwards")
         move_drone("move_up", 5)
         
+        print("Image Processing")
         obstacle_detected = get_user_input("Is an obstacle detected?")
         
         if obstacle_detected:
@@ -156,18 +157,21 @@ def simulate_drone():
             
             if is_speaker:
                 print("Speaker detected")
+                print("Frequency Processing")
                 violet_sound_detected = get_user_input("Is violet sound detected?")
                 
                 if violet_sound_detected:
                     print("Violet sound detected")
+                    print("Moving Forward")
                     move_drone("move_forward", 5)
                     print("Frequency Response and ANC Speaker activated")
+                    print("Detecting distance")
                     move_drone("hover", 5)
                     
                     db_reduced = get_user_input("Is dB reduced?")
                     if db_reduced:
-                        print("dB reduced, hovering for demonstration")
-                        move_drone("hover", 10)
+                        print("dB reduced, hovering for 30s")
+                        move_drone("hover", 30)
                         count += 1
                         
                         if count >= 3:
