@@ -1,140 +1,159 @@
+import RPi.GPIO as GPIO
 import time
 import random
-import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
+# Set up GPIO
+GPIO.setmode(GPIO.BOARD)
 
-class Servo:
-    def __init__(self, name, pin):
-        self.name = name
-        self.pin = pin
-        self.angle = 0
-        GPIO.setup(self.pin, GPIO.OUT)
-        self.pwm = GPIO.PWM(self.pin, 50)  # 50Hz frequency
-        self.pwm.start(0)
+# Define servo pins
+servo1_pin = 13  # GPIO 27
+servo2_pin = 15  # GPIO 22
+servo3_pin = 18  # GPIO 24
+servo4_pin = 16  # GPIO 23
 
-    def set_angle(self, angle):
-        self.angle = angle
-        duty = angle / 18 + 2
-        self.pwm.ChangeDutyCycle(duty)
-        print(f"Servo {self.name} moved to {self.angle} degrees")
+# Set up GPIO pins
+GPIO.setup(servo1_pin, GPIO.OUT)
+GPIO.setup(servo2_pin, GPIO.OUT)
+GPIO.setup(servo3_pin, GPIO.OUT)
+GPIO.setup(servo4_pin, GPIO.OUT)
 
-class Drone:
-    def __init__(self):
-        self.battery = 100
-        self.position = 0  # 0: ground, 1: air
-        self.count = 0
-        self.servos = {
-            'move': Servo('move', 13),    # GPIO 27
-            'camera': Servo('camera', 15),  # GPIO 22
-            'audio': Servo('audio', 16),   # GPIO 23
-            'hover': Servo('hover', 18)    # GPIO 24
-        }
+# Create PWM objects for each servo
+servo1 = GPIO.PWM(servo1_pin, 50)
+servo2 = GPIO.PWM(servo2_pin, 50)
+servo3 = GPIO.PWM(servo3_pin, 50)
+servo4 = GPIO.PWM(servo4_pin, 50)
 
-    def perform_action(self, action, duration=1):
-        print(f"Performing action: {action}")
-        if action == "Move Upwards":
-            self.servos['move'].set_angle(180)
-        elif action == "Move Backwards":
-            self.servos['move'].set_angle(0)
-        elif action == "Move Forward":
-            self.servos['move'].set_angle(90)
-        elif action == "Image Processing":
-            self.servos['camera'].set_angle(90)
-        elif action == "Audio Processing":
-            self.servos['audio'].set_angle(90)
-        elif action == "Hover":
-            self.servos['hover'].set_angle(90)
-        elif action == "Land":
-            self.servos['move'].set_angle(0)
-            self.servos['hover'].set_angle(0)
-        time.sleep(duration)
-        
-        # Reset servos after action (except for landing)
-        if action != "Land":
-            for servo in self.servos.values():
-                servo.set_angle(0)
+# Start PWM
+servo1.start(0)
+servo2.start(0)
+servo3.start(0)
+servo4.start(0)
 
-    def update_battery(self):
-        self.battery -= random.randint(1, 5)
-        return self.battery > 20
+def set_servo_speed(servo, speed):
+    """Set servo speed (duty cycle)"""
+    if speed == "normal":
+        duty = 7.5  # Adjust as needed
+    elif speed == "high":
+        duty = 10  # Adjust as needed
+    servo.ChangeDutyCycle(duty)
 
-def drone_logic():
-    print("START")
+def move_drone(movement, speed="normal"):
+    """Control drone movement based on the control diagram"""
+    if movement == "move_down":
+        set_servo_speed(servo1, speed)
+        set_servo_speed(servo2, speed)
+        set_servo_speed(servo3, "normal")
+        set_servo_speed(servo4, "normal")
+    elif movement == "move_up":
+        set_servo_speed(servo1, "normal")
+        set_servo_speed(servo2, "normal")
+        set_servo_speed(servo3, speed)
+        set_servo_speed(servo4, speed)
+    elif movement == "move_forward":
+        set_servo_speed(servo1, speed)
+        set_servo_speed(servo2, "normal")
+        set_servo_speed(servo3, speed)
+        set_servo_speed(servo4, "normal")
+    elif movement == "move_backward":
+        set_servo_speed(servo1, "normal")
+        set_servo_speed(servo2, speed)
+        set_servo_speed(servo3, "normal")
+        set_servo_speed(servo4, speed)
+    elif movement == "bend_left":
+        set_servo_speed(servo1, "normal")
+        set_servo_speed(servo2, speed)
+        set_servo_speed(servo3, "normal")
+        set_servo_speed(servo4, speed)
+    elif movement == "bend_right":
+        set_servo_speed(servo1, speed)
+        set_servo_speed(servo2, "normal")
+        set_servo_speed(servo3, speed)
+        set_servo_speed(servo4, "normal")
+    elif movement == "rotate_left":
+        set_servo_speed(servo1, "normal")
+        set_servo_speed(servo2, speed)
+        set_servo_speed(servo3, speed)
+        set_servo_speed(servo4, "normal")
+    elif movement == "rotate_right":
+        set_servo_speed(servo1, speed)
+        set_servo_speed(servo2, "normal")
+        set_servo_speed(servo3, "normal")
+        set_servo_speed(servo4, speed)
+
+def simulate_drone():
+    print("Drone simulation started")
+    
+    # Power On
     print("Power On")
     
-    drone = Drone()
+    battery_low = False
     drone_landed = False
-
+    count = 0
+    
     while not drone_landed:
-        print(f"\nCurrent battery: {drone.battery}%")
-        print("Checking battery...")
-        if drone.update_battery():
-            print("Battery OK")
-            
-            # User input for current situation
-            print("\nSelect the current situation:")
-            print("1. Takeoff")
-            print("2. Obstacle detected")
-            print("3. Violet sound detected")
-            print("4. Speaker detected")
-            print("5. No obstacle or sound detected")
-            print("6. Land")
-            
-            choice = input("Enter your choice (1-6): ")
-            
-            if choice == "1":
-                drone.perform_action("Move Upwards")
-                drone.position = 1
-                print("Processing image and audio")
-                drone.perform_action("Image Processing", 0.5)
-                drone.perform_action("Audio Processing", 0.5)
-            elif choice == "2":
-                print("Obstacle detected")
-                drone.perform_action("Detect distance")
-                drone.perform_action("Move Backwards")
-            elif choice == "3":
-                print("Violet sound detected")
-            elif choice == "4":
-                print("Speaker detected")
-                drone.perform_action("Detect distance")
-                drone.perform_action("Move Forward")
-                drone.perform_action("ANC Speaker")
-                print("Attempting to reduce dB...")
-                if random.random() < 0.8:  # 80% chance of success
-                    print("dB reduced")
-                    drone.perform_action("Hover", 3)
-                    drone.count += 1
-                    print(f"Count: {drone.count}")
-                    if drone.count >= 3:
-                        print("Count reached 3, initiating landing")
-                        drone.perform_action("Land")
-                        drone_landed = True
-                else:
-                    print("Failed to reduce dB, continuing search")
-            elif choice == "5":
-                print("No obstacle or sound detected, continuing search")
-                drone.perform_action("Hover", 1)
-            elif choice == "6":
-                print("Initiating landing")
-                drone.perform_action("Land")
-                drone_landed = True
-            else:
-                print("Invalid choice, please try again")
-        else:
-            print("Battery Low, initiating landing")
-            drone.perform_action("Land")
-            drone_landed = True
+        # Check battery
+        if not battery_low:
+            battery_low = random.choice([True, False])
         
-        print("Transmitting data to telemetry")
-        print("Updating battery life, GPS, live streaming, decibel meter")
-
+        if battery_low:
+            print("Battery Low")
+            drone_landed = True
+            break
+        
+        # Move Upwards
+        print("Moving Upwards")
+        move_drone("move_up", "high")
+        time.sleep(2)
+        
+        # Image and Audio Processing
+        obstacle_detected = random.choice([True, False])
+        violet_sound_detected = random.choice([True, False])
+        
+        if obstacle_detected:
+            print("Obstacle detected, moving backwards")
+            move_drone("move_backward", "high")
+            time.sleep(2)
+        elif violet_sound_detected:
+            print("Violet sound detected")
+            move_drone("move_forward")
+            time.sleep(1)
+            print("Frequency Response")
+            time.sleep(1)
+            print("ANC Speaker activated")
+            time.sleep(1)
+            
+            if random.choice([True, False]):  # dB reduced
+                print("dB reduced, hovering for 30s")
+                move_drone("move_up")  # Hover
+                time.sleep(30)
+                count += 1
+                
+                if count >= 3:
+                    print("Count reached 3, landing")
+                    drone_landed = True
+            else:
+                print("dB not reduced, continuing")
+        
+        # Data Transmission
+        print("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
+        time.sleep(1)
+    
+    # Landing
+    print("Landing")
+    move_drone("move_down", "normal")
+    time.sleep(3)
     print("Drone landed")
-    print("END")
 
-# Run the drone logic
+# Run the simulation
 try:
-    drone_logic()
+    simulate_drone()
+except KeyboardInterrupt:
+    print("Simulation interrupted by user")
 finally:
-    # Clean up GPIO at the end
+    # Clean up
+    servo1.stop()
+    servo2.stop()
+    servo3.stop()
+    servo4.stop()
     GPIO.cleanup()
+    print("GPIO cleaned up")
