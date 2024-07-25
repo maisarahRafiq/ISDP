@@ -1,6 +1,5 @@
 import RPi.GPIO as GPIO
 import time
-import random
 
 # Set up GPIO
 GPIO.setmode(GPIO.BOARD)
@@ -80,6 +79,14 @@ def move_drone(movement, speed="normal"):
         set_servo_speed(servo3, "normal")
         set_servo_speed(servo4, speed)
 
+def get_user_input(prompt):
+    """Get user input (y/n) for decision points"""
+    while True:
+        response = input(prompt + " (y/n): ").lower()
+        if response in ['y', 'n']:
+            return response == 'y'
+        print("Please enter 'y' or 'n'.")
+
 def simulate_drone():
     print("Drone simulation started")
     
@@ -92,8 +99,7 @@ def simulate_drone():
     
     while not drone_landed:
         # Check battery
-        if not battery_low:
-            battery_low = random.choice([True, False])
+        battery_low = get_user_input("Is battery low?")
         
         if battery_low:
             print("Battery Low")
@@ -106,37 +112,43 @@ def simulate_drone():
         time.sleep(2)
         
         # Image and Audio Processing
-        obstacle_detected = random.choice([True, False])
-        violet_sound_detected = random.choice([True, False])
+        obstacle_detected = get_user_input("Is an obstacle detected?")
         
         if obstacle_detected:
             print("Obstacle detected, moving backwards")
             move_drone("move_backward", "high")
             time.sleep(2)
-        elif violet_sound_detected:
-            print("Violet sound detected")
-            move_drone("move_forward")
-            time.sleep(1)
-            print("Frequency Response")
-            time.sleep(1)
-            print("ANC Speaker activated")
-            time.sleep(1)
+        else:
+            violet_sound_detected = get_user_input("Is violet sound detected?")
             
-            if random.choice([True, False]):  # dB reduced
-                print("dB reduced, hovering for 30s")
-                move_drone("move_up")  # Hover
-                time.sleep(30)
-                count += 1
+            if violet_sound_detected:
+                print("Violet sound detected")
+                move_drone("move_forward")
+                time.sleep(1)
+                print("Frequency Response")
+                time.sleep(1)
+                print("ANC Speaker activated")
+                time.sleep(1)
                 
-                if count >= 3:
-                    print("Count reached 3, landing")
-                    drone_landed = True
-            else:
-                print("dB not reduced, continuing")
+                db_reduced = get_user_input("Is dB reduced?")
+                if db_reduced:
+                    print("dB reduced, hovering for 30s")
+                    move_drone("move_up")  # Hover
+                    time.sleep(30)
+                    count += 1
+                    
+                    if count >= 3:
+                        print("Count reached 3, landing")
+                        drone_landed = True
+                else:
+                    print("dB not reduced, continuing")
         
         # Data Transmission
         print("Transmitting data: Battery life, GPS, Live Streaming, Decibel meter")
         time.sleep(1)
+        
+        # Check if drone has landed
+        drone_landed = get_user_input("Has the drone landed?")
     
     # Landing
     print("Landing")
