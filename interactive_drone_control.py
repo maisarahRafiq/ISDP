@@ -37,16 +37,21 @@ def log(message):
 
 def set_servo_angle(servo, angle):
     """Set servo to a specific angle"""
-    duty = angle / 18 + 2
+    duty = min(max(angle / 18 + 2, 2), 12)  # Constrain duty cycle to 2-12%
     servo.ChangeDutyCycle(duty)
     # Commenting out the print statement for servo angle
     # log(f"Set servo to angle {angle}")
 
 def rotate_servo(servo, start_angle, end_angle, duration, steps):
+    """Rotate the servo from start_angle to end_angle over a duration"""
     step = 10 if start_angle < end_angle else -10
     for angle in range(start_angle, end_angle, step):
-        set_servo_angle(servo, angle % 360)
+        # Ensure angle is within bounds
+        angle = min(max(angle, 0), 180)
+        set_servo_angle(servo, angle)
         time.sleep(duration / steps)
+    # Set the final angle explicitly to ensure it ends at the correct position
+    set_servo_angle(servo, end_angle)
 
 def move_drone(movement, speed='normal'):
     """Control drone movement with parallel servo operation"""
@@ -63,66 +68,66 @@ def move_drone(movement, speed='normal'):
     if movement == "move_down":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 0, 360))
+                threading.Thread(target=parallel_rotate, args=(servo1, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 0, 180))
             ]
     elif movement == "move_up":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 360, 0))
+                threading.Thread(target=parallel_rotate, args=(servo1, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 180, 0))
             ]
     elif movement == "move_forward":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 0, 360))
+                threading.Thread(target=parallel_rotate, args=(servo1, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 0, 180))
             ]
     elif movement == "move_backward":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 360, 0))
+                threading.Thread(target=parallel_rotate, args=(servo1, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 180, 0))
             ]
     elif movement == "bend_left":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 360, 0))
+                threading.Thread(target=parallel_rotate, args=(servo1, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 180, 0))
             ]
     elif movement == "bend_right":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 0, 360))
+                threading.Thread(target=parallel_rotate, args=(servo1, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 0, 180))
             ]
     elif movement == "rotate_left":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 0, 360))
+                threading.Thread(target=parallel_rotate, args=(servo1, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 0, 180))
             ]
     elif movement == "rotate_right":
         for _ in range(3):
             threads = [
-                threading.Thread(target=parallel_rotate, args=(servo1, 360, 0)),
-                threading.Thread(target=parallel_rotate, args=(servo2, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo3, 0, 360)),
-                threading.Thread(target=parallel_rotate, args=(servo4, 360, 0))
+                threading.Thread(target=parallel_rotate, args=(servo1, 180, 0)),
+                threading.Thread(target=parallel_rotate, args=(servo2, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo3, 0, 180)),
+                threading.Thread(target=parallel_rotate, args=(servo4, 180, 0))
             ]
     elif movement == "hover":
         for _ in range(3):
