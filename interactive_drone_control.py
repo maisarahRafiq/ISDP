@@ -47,10 +47,15 @@ def move_drone(movement, speed='normal'):
     duration = 5 if speed == 'normal' else 2.5
     steps = 36  # For smoother 360-degree rotation
 
-    def rotate_servo(servo, start_angle, end_angle):
-        for angle in range(start_angle, end_angle, 10):
-            set_servo_angle(servo, angle % 360)
-            time.sleep(duration / steps)
+    def rotate_servo(servo, start_angle, end_angle, step=10):
+        if start_angle < end_angle:
+            for angle in range(start_angle, end_angle, step):
+                set_servo_angle(servo, angle % 360)
+                time.sleep(duration / steps)
+        else:
+            for angle in range(start_angle, end_angle, -step):
+                set_servo_angle(servo, angle % 360)
+                time.sleep(duration / steps)
 
     if movement == "move_down":
         for _ in range(3):
@@ -60,46 +65,46 @@ def move_drone(movement, speed='normal'):
             rotate_servo(servo4, 0, 360)
     elif movement == "move_up":
         for _ in range(3):
-            rotate_servo(servo1, 360, 0, -10)
-            rotate_servo(servo2, 360, 0, -10)
-            rotate_servo(servo3, 360, 0, -10)
-            rotate_servo(servo4, 360, 0, -10)
+            rotate_servo(servo1, 360, 0)
+            rotate_servo(servo2, 360, 0)
+            rotate_servo(servo3, 360, 0)
+            rotate_servo(servo4, 360, 0)
     elif movement == "move_forward":
         for _ in range(3):
-            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo1, 360, 0)
             rotate_servo(servo2, 0, 360)
-            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo3, 360, 0)
             rotate_servo(servo4, 0, 360)
     elif movement == "move_backward":
         for _ in range(3):
             rotate_servo(servo1, 0, 360)
-            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo2, 360, 0)
             rotate_servo(servo3, 0, 360)
-            rotate_servo(servo4, 360, 0, -10)
+            rotate_servo(servo4, 360, 0)
     elif movement == "bend_left":
         for _ in range(3):
             rotate_servo(servo1, 0, 360)
             rotate_servo(servo2, 0, 360)
-            rotate_servo(servo3, 360, 0, -10)
-            rotate_servo(servo4, 360, 0, -10)
+            rotate_servo(servo3, 360, 0)
+            rotate_servo(servo4, 360, 0)
     elif movement == "bend_right":
         for _ in range(3):
-            rotate_servo(servo1, 360, 0, -10)
-            rotate_servo(servo2, 360, 0, -10)
+            rotate_servo(servo1, 360, 0)
+            rotate_servo(servo2, 360, 0)
             rotate_servo(servo3, 0, 360)
             rotate_servo(servo4, 0, 360)
     elif movement == "rotate_left":
         for _ in range(3):
             rotate_servo(servo1, 0, 360)
-            rotate_servo(servo2, 360, 0, -10)
-            rotate_servo(servo3, 360, 0, -10)
+            rotate_servo(servo2, 360, 0)
+            rotate_servo(servo3, 360, 0)
             rotate_servo(servo4, 0, 360)
     elif movement == "rotate_right":
         for _ in range(3):
-            rotate_servo(servo1, 360, 0, -10)
+            rotate_servo(servo1, 360, 0)
             rotate_servo(servo2, 0, 360)
             rotate_servo(servo3, 0, 360)
-            rotate_servo(servo4, 360, 0, -10)
+            rotate_servo(servo4, 360, 0)
     elif movement == "hover":
         for _ in range(3):
             set_servo_angle(servo1, 0)
@@ -107,6 +112,7 @@ def move_drone(movement, speed='normal'):
             set_servo_angle(servo3, 0)
             set_servo_angle(servo4, 0)
             time.sleep(duration / 3)
+
 def get_user_input(prompt):
     """Get user input (y/n) for decision points"""
     while True:
